@@ -23,10 +23,10 @@ const MSGS = {
 
 function update(msg, model) {
   switch (msg) {
-    case 'ADD':
+    case MGGS.ADD:
       return model + 1;
       break;
-    case 'SUBTRACT':
+    case MSGS.SUBTRACT:
       return model - 1;
       break;
     default:
