@@ -8,9 +8,6 @@
   "author": "James Moore",
   "license": "MIT",
   "devDependencies": {
-    "hyperscript": "^2.0.2",
-    "hyperscript-helpers": "^3.0.3",
-    "virtual-dom": "^2.1.1",
     "webpack": "^4.28.3",
     "webpack-dev-server": "^3.1.14"
   },
@@ -19,7 +16,9 @@
     "babel-loader": "^7.1.5",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "hyperscript-helpers": "^3.0.3",
     "package.json": "^2.0.1",
+    "virtual-dom": "^2.1.1",
     "webpack-cli": "^3.1.2"
   }
 }

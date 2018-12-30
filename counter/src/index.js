@@ -1,5 +1,6 @@
-import h from 'hyperscript';
 import hh from 'hyperscript-helpers';
+import { h, diff, patch } from 'virtual-dom';
+import createElement from 'virtual-dom/create-element'
 
 const { div, button } = hh(h);
 
@@ -9,18 +10,23 @@ function view(dispatch, model) {
   return div([
     div({ className: 'mv2' }, `Count ${model}`),
     button({ className: 'pv1 ph2 mr2',
-      onclick: () => dispatch('plus') }, '+'),
+      onclick: () => dispatch(MSGS.ADD) }, '+'),
     button({ className: 'pv1 ph2',
-      onclick: () => dispatch('minus') }, '-'),
+      onclick: () => dispatch(MSGS.SUBTRACT) }, '-'),
   ]);
+};
+
+const MSGS = {
+  ADD: 'ADD',
+  SUBTRACT: 'SUBTRACT',
 };
 
 function update(msg, model) {
   switch (msg) {
-    case 'plus':
+    case 'ADD':
       return model + 1;
       break;
-    case 'minus':
+    case 'SUBTRACT':
       return model - 1;
       break;
     default:
@@ -32,11 +38,13 @@ function update(msg, model) {
 function app(model, view, update, node) {
   let currentState = model;
   let currentView = view(dispatch, currentState);
-  node.appendChild(currentView);
+  let rootNode = createElement(currentView);
+  node.appendChild(rootNode);
   function dispatch(msg) {
     currentState = update(msg, currentState);
     const updatedView = view(dispatch, currentState);
-    node.replaceChild(updatedView, currentView);
+    const patches = diff(currentView, updatedView);
+    rootNode = patch(rootNode, patches);
     currentView = updatedView;
   }
 };
