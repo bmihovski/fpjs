@@ -19,10 +19,10 @@ function update(msg, model) {
   switch (msg) {
     case 'plus':
       return model + 1;
-      //break;
+      break;
     case 'minus':
       return model - 1;
-      //break;
+      break;
     default:
       return model;
   };
