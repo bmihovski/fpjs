@@ -28,7 +28,7 @@ function update(msg, model) {
   };
 };
 
-// inpure code
+// impure code
 function app(model, view, update, node) {
   let currentState = model;
   let currentView = view(dispatch, currentState);
