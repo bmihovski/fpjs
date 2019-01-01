@@ -63,7 +63,7 @@ function add(msg, model) {
   const meals = [...model.meals, meal ];
   return {
     ...model,
-    meals,
+    meals: meals,
     description: '',
     calories: 0,
     showForm: false,
