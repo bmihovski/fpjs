@@ -1,24 +1,31 @@
 import hh from 'hyperscript-helpers';
 import { h } from 'virtual-dom';
-import { showFormMsg,
-         mealInputMsg,
-         caloriesInputMsg,
-         saveMealMsg
-       } from './Update.js';
+import * as R from 'ramda';
+import {
+  showFormMsg,
+  mealInputMsg,
+  caloriesInputMsg,
+  saveMealMsg,
+  deleteMealMsg,
+} from './Update';
 
-const { pre, div, h1, button, form, label, input } = hh(h);
+
+const { pre, div, h1, button,
+        form, label, input,
+        tr, td, tbody,
+        thead, th, table, i } = hh(h);
 
 function fieldSet(labelText, inputValue, oninput) {
   return div([
-        label({ className: 'db mb1' }, labelText),
-         input({
-           className: 'pa2 input-reset ba w-100 mb2',
-           type: 'text',
-           value: inputValue,
-           oninput
-         }),
-       ]);
-     };
+    label({ className: 'db mb1' }, labelText),
+    input({
+      className: 'pa2 input-reset ba w-100 mb2',
+      type: 'text',
+      value: inputValue,
+      oninput
+    }),
+  ]);
+}
 
 function buttonSet(dispatch) {
   return div([
@@ -26,8 +33,8 @@ function buttonSet(dispatch) {
       {
         className: 'f3 pv2 ph3 bg-blue white bn mr2 dim',
         type: 'submit',
-        },
-        'Save',
+      },
+      'Save',
     ),
     button(
       {
@@ -38,7 +45,7 @@ function buttonSet(dispatch) {
       'Cancel',
     ),
   ]);
-};
+}
 
 function formView(dispatch, model) {
   const { description, calories, showForm } = model;
@@ -52,29 +59,84 @@ function formView(dispatch, model) {
         },
       },
       [
-          fieldSet('Meal', description,
+        fieldSet('Meal', description,
           e => dispatch(mealInputMsg(e.target.value))
         ),
-          fieldSet('Calories', calories || '',
+        fieldSet('Calories', calories || '',
           e => dispatch(caloriesInputMsg(e.target.value))
         ),
-          buttonSet(dispatch),
+        buttonSet(dispatch),
       ],
     );
-  };
+  }
   return button(
-    { className: 'f3 pv2 ph3 bg-blue white bn',
-      onclick: () => dispatch(showFormMsg(true)),
-    },
-    'Add Meal',
-  );
-};
+      {
+        className: 'f3 pv2 ph3 bg-blue white bn',
+        onclick: () => dispatch(showFormMsg(true)),
+      },
+      'Add Meal',
+    );
+}
 
 function view(dispatch, model) {
   return div({ className: 'mw6 center' }, [
     h1({ className: 'f2 pv2 bb' }, 'Calorie Counter'),
     formView(dispatch, model),
+    tableView(dispatch, model.meals),
     pre(JSON.stringify(model, null, 2)),
+  ]);
+};
+
+function cell(tag, className, value) {
+  return tag({className}, value);
+};
+
+function mealRow(dispatch, className, meal) {
+  return tr({ className }, [
+    cell(td, 'pa2' , meal.description ),
+    cell(td, 'pa2 tr', meal.calories),
+    cell(td, 'pa2 tr', [
+      i({ className: 'ph1 fa fa-trash-o pointer',
+      onclick: () => dispatch(deleteMealMsg(meal.id))}),
+
+    ]),
+  ]);
+};
+
+function mealsBody(dispatch, className, meals) {
+  const rows = R.map(R.partial(mealRow, [dispatch, 'stripe-dark']),
+  meals);
+  const rowsWithTotal = [...rows, totalRow(meals)];
+  return tbody({ className }, rowsWithTotal);
+};
+
+function totalRow(meals) {
+  const calOnly = function(meal) {
+    return meal.calories;
+  };
+  const calSum = R.pipe(R.map(calOnly), R.sum);
+  return tr({ className: 'bt b' }, [
+    cell(td, 'pa2 tr', 'Total:'),
+    cell(td, 'pa2 tr', calSum(meals)),
+    cell(td, '', ''),
+  ]);
+};
+
+const tableHeader = thead([
+  tr([
+    cell(th, 'pa2 tl', 'Meal'),
+    cell(th, 'pa2 tr', 'Calories'),
+    cell(th, '', ''),
+  ]),
+]);
+
+function tableView(dispatch, meals) {
+  if (meals.length === 0) {
+    return div({ className: 'mv2 i black-50' }, 'No meals to display...');
+  }
+  return table({className: 'mv2 w-100 collapse' }, [
+    tableHeader,
+    mealsBody(dispatch, '', meals),
   ]);
 };
 
