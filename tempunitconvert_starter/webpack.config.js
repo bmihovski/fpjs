@@ -9,6 +9,7 @@ module.exports = {
     contentBase: './src',
     compress: true,
     port: 9000,
+    host: '127.0.0.1',
   },
   module: {
     rules: [

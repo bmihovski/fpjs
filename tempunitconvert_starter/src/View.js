@@ -7,6 +7,8 @@ const {
   h1,
   pre,
   input,
+  select,
+  option
 } = hh(h);
 
 const UNITS = ['Fahrenheit', 'Celsius', 'Kelvin'];
@@ -18,20 +20,18 @@ function unitOptions(selectedUnit) {
   )
 }
 
-function unitSection(dispatch, unit, value, inputMsg, unitMsg) {
+function unitSection(dispatch, unit, value) {
   return div({ className: 'w-50 ma1' }, [
     input({
       type: 'text',
       className: 'db w-100 mv2 pa2 input-reset ba',
-      value,
-      oninput: e => dispatch(inputMsg(e.target.value)),
+      value
     }),
     select(
       {
         className: 'db w-100 pa2 ba input-reset br1 bg-white ba b--black',
-        onchange: e => dispatch(unitMsg(e.target.value)),
       },
-      unitOptions(unit),
+      unitOptions(unit)
     ),
   ]);
 }
@@ -43,16 +43,12 @@ function view(dispatch, model) {
       unitSection(
         dispatch,
         model.leftUnit,
-        model.leftValue,
-        leftValueInputMsg,
-        leftUnitChangedMsg,
+        model.leftValue
       ),
       unitSection(
         dispatch,
         model.rightUnit,
-        model.rightValue,
-        rightValueInputMsg,
-        rightUnitChangedMsg,
+        model.rightValue
       ),
     ]),
     pre(JSON.stringify(model, null, 2)),
