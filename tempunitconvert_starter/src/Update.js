@@ -44,7 +44,8 @@ function update (msg, model) {
 		if (leftValue === '') {
 			return { ...model, leftValue: '', rightValue: '', sourceLeft: true};
 		} else {
-			return { ...model, leftValue: toInt(leftValue), sourceLeft: true};
+			const updatedWithLeftValue = { ...model, leftValue: toInt(leftValue), sourceLeft: true};
+			return convert(updatedWithLeftValue);
 		};
 		break;
 	case MSGS.RIGHT_INPUT:
@@ -52,21 +53,87 @@ function update (msg, model) {
 		if (rightValue === '') {
 			return { ...model, rightValue: '', leftValue: '', sourceLeft: false};
 		} else {
-			return { ...model, rightValue: toInt(rightValue), sourceLeft: false};
+			const updatedWithRightValue = { ...model, rightValue: toInt(rightValue), sourceLeft: false};
+			return convert(updatedWithRightValue);
 		}
 		break;
 	case MSGS.LEFT_UNIT:
 		const { leftUnit } = msg;
-		return { ...model, leftUnit };
+		const updatedWithLeftUnit = { ...model, leftUnit };
+		return convert(updatedWithLeftUnit);
 		break;
 	case MSGS.RIGHT_UNIT:
 		const { rightUnit } = msg;
-		return { ...model, rightUnit };
+		const updatedWithRightUnit = { ...model, rightUnit };
+		return convert(updatedWithRightUnit);
 		break;
 	default:
 		return model;
 		break;
 	};
+};
+
+function roundOut(num) {
+	return Math.round(num * 10) / 10;
+	
+};
+
+function convert(model) {
+	const { leftValue, leftUnit, rightValue, rightUnit, sourceLeft } = model;
+	const [ unitFrom, unitTo, value ] =
+		sourceLeft ? 
+			[ leftUnit, rightUnit, leftValue ] :
+					[ rightUnit, leftUnit, rightValue ];
+	const convertedValue = R.pipe(
+			convertTemp,
+			roundOut
+			)( unitFrom, unitTo, value );
+	return sourceLeft ?
+			{ ...model, rightValue: convertedValue } :
+				{ ...model, leftValue: convertedValue };
+};
+
+function convertTemp(unitFrom, unitTo, temp) {
+	const outTemp = R.pathOr(
+			R.identity,
+			[unitFrom, unitTo],
+			unitCombinations
+	);
+	return outTemp(temp);
+};
+
+function farToCel(temp) {
+	return 5 / 9 * (temp - 32);
+};
+
+function celToFar(temp) {
+	return 9 / 5 * temp + 32;
+};
+
+function kelToCel(temp) {
+	return temp - 273.15;
+};
+
+function celToKel(temp) {
+	return temp + 273.15;
+};
+
+const farToKel = R.pipe(farToCel, celToKel);
+const kelToFar = R.pipe(kelToCel, celToFar);
+
+const unitCombinations = {
+		Celsius: {
+			Fahrenheit: celToFar,
+			Kelvin: celToKel
+		},
+		Fahrenheit: {
+			Celsius: farToCel,
+			Kelvin: farToKel
+		},
+		Kelvin: {
+			Celsius: kelToCel,
+			Fahrenheit: kelToFar
+		},
 };
 
 export default update;
